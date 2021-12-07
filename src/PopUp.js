@@ -9,8 +9,8 @@ export default function PopoverPopupState(props) {
         <PopupState variant="popover">
             {(popupState) => (
                 <div>
-                    <Button variant="contained" {...bindTrigger(popupState)}>
-                        Open Popover
+                    <Button variant="text" {...bindTrigger(popupState)}>
+                        read
                     </Button>
                     <Popover
                         {...bindPopover(popupState)}

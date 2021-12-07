@@ -1,137 +1,96 @@
-import './App.css';
-import {
-    Button,
-    Container,
-    Paper,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TablePagination,
-    TableRow,
-    TextField,
-    Tooltip
-} from "@mui/material";
-import {useEffect, useState} from "react";
-import PopoverPopupState from "./PopUp";
-
-function App() {
-    const columns = [
-        {id: 'name', label: 'Name', minWidth: 170},
-        {id: 'dateAdded', label: 'Date Added', minWidth: 100},
-        {
-            id: 'dateToDo',
-            label: 'Date To Do',
-            minWidth: 170,
-            align: 'right',
-        },
-    ];
-
-    const [rows, setRows] = useState([{}])
-    const [taskName, setTaskName] = useState('')
-    const [dateToDo, setDateToDo] = useState('')
-    const [extraInfo, setExtraInfo] = useState('(no info)')
-    const [allInfos, setAllInfos] = useState([])
-
-    function addRow(name, dateAdded, dateToDo) {
-        setRows([...rows, {name, dateAdded, dateToDo}])
-        setAllInfos([...allInfos, extraInfo])
-    }
-
-    const TableComponent = () => {
-        const [page, setPage] = useState(0);
-        const [rowsPerPage, setRowsPerPage] = useState(10);
-
-        const handleChangePage = (event, newPage) => {
-            setPage(newPage);
-        };
-
-        const handleChangeRowsPerPage = (event) => {
-            setRowsPerPage(+event.target.value);
-            setPage(0);
-        };
-
-        return (
-            <Paper sx={{width: '100%', overflow: 'hidden'}}>
-                <TableContainer sx={{maxHeight: 440}}>
-                    <Table stickyHeader aria-label="sticky table">
-                        <TableHead>
-                            <TableRow>
-                                {columns.map((column) => (
-                                    <TableCell
-                                        key={column.id}
-                                        align={column.align}
-                                        style={{minWidth: column.minWidth}}
-                                    >
-                                        {column.label}
-                                    </TableCell>
-                                ))}
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {rows?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, idx) => {
-                                return (
-                                    <PopoverPopupState>
-                                        <Tooltip title={allInfos[idx]}>
-                                            <TableRow hover role="checkbox" tabIndex={-1}>
-                                                {columns.map((column, index) => {
-                                                    const value = row[column.id];
-                                                    return (
-                                                        <TableCell key={column.id} align={column.align}>
-                                                            {value}
-                                                        </TableCell>
-                                                    );
-                                                })}
-                                            </TableRow>
-                                        </Tooltip>
-                                    </PopoverPopupState>
-                                );
-                            })}
-                        </TableBody>
+import * as React from 'react';
+import Box from '@mui/material/Box';
+import Drawer from '@mui/material/Drawer';
+import Button from '@mui/material/Button';
+import Divider from '@mui/material/Divider';
+import ListItem from '@mui/material/ListItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import InboxIcon from '@mui/icons-material/MoveToInbox';
+import MailIcon from '@mui/icons-material/Mail';
+import {AppBar, IconButton, List, Toolbar, Typography} from "@mui/material";
+import MenuIcon from '@mui/icons-material/Menu';
+import AuiList from "./AuiList";
+import {AccountCircle, FormatListNumbered, Info, ListAlt, Settings, Warning} from "@mui/icons-material";
 
 
-                    </Table>
-                </TableContainer>
-                <TablePagination
-                    rowsPerPageOptions={[10, 25, 100]}
-                    component="div"
-                    count={rows.length}
-                    rowsPerPage={rowsPerPage}
-                    page={page}
-                    onPageChange={handleChangePage}
-                    onRowsPerPageChange={handleChangeRowsPerPage}
-                />
-            </Paper>
-        )
-    }
+export default function TemporaryDrawer() {
+    const [state, setState] = React.useState({
+        top: false,
+        left: false,
+        bottom: false,
+        right: false,
+    });
 
-    useEffect(() => {
-        setAllInfos([...allInfos, ''])
-    }, [])
+    const toggleDrawer = (anchor, open) => (event) => {
+        if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
+            return;
+        }
+
+        setState({...state, [anchor]: open});
+    };
+
+    const list = (anchor) => (
+        <Box
+            sx={{width: anchor === 'top' || anchor === 'bottom' ? 'auto' : 250}}
+            role="presentation"
+            onClick={toggleDrawer(anchor, false)}
+            onKeyDown={toggleDrawer(anchor, false)}
+        >
+            <List>
+                {['List', '*not implemented yet*', '*not implemented yet*', '*not implemented yet*'].map((text, index) => (
+                    <ListItem button key={text}>
+                        <ListItemIcon>
+                            {index === 0 ? <ListAlt/> : <Warning/>}
+                        </ListItemIcon>
+                        <ListItemText primary={text}/>
+                    </ListItem>
+                ))}
+            </List>
+            <Divider/>
+            <List>
+                {['About', 'Settings', 'Profile'].map((text, index) => (
+                    <ListItem button key={text}>
+                        <ListItemIcon>
+                            {index === 2 ? <AccountCircle/> : index === 1 ? <Settings/> : <Info/>}
+                        </ListItemIcon>
+                        <ListItemText primary={text}/>
+                    </ListItem>
+                ))}
+            </List>
+        </Box>
+    );
 
     return (
-        <Container>
-            <h1>AUI</h1>
-            <br/><br/>
-            <h4>Tasks</h4>
-            <br/><br/>
-            <TextField id="outlined-basic" label="Task Name" variant="outlined" value={taskName}
-                       onChange={e => setTaskName(e.target.value)}/>
-            <TextField id="outlined-basic" label="Extra Information" variant="outlined" value={extraInfo}
-                       onChange={e => setExtraInfo(e.target.value)}/>
-            <TextField
-                label="Date To Do"
-                type="date"
-                value={dateToDo}
-                onChange={e => setDateToDo(e.target.value)}
-            />
-            <Button variant="contained"
-                    onClick={() => addRow(taskName, new Date().toLocaleDateString("uk-Uk"), new Date(dateToDo).toLocaleDateString("uk-UK"))}>Add</Button>
-            <br/><br/>
-            <TableComponent/>
-        </Container>
+        <div>
+            <Box sx={{flexGrow: 1}}>
+                <AppBar position="static">
+                    <Toolbar>
+                        <IconButton
+                            size="large"
+                            edge="start"
+                            color="inherit"
+                            aria-label="menu"
+                            sx={{mr: 2}}
+                            onClick={toggleDrawer('left', true)}
+                        >
+                            <MenuIcon/>
+                        </IconButton>
+                        <Typography variant="h6" component="div" sx={{flexGrow: 1}}>
+                            List
+                        </Typography>
+                        <Button color="inherit">Login</Button>
+                    </Toolbar>
+                </AppBar>
+                <AuiList/>
+            </Box>
+            <Drawer
+                anchor={'left'}
+                open={state['left']}
+                onClose={toggleDrawer('left', false)}
+            >
+                {list('left')}
+            </Drawer>
+        </div>
     );
 }
-
-export default App;
