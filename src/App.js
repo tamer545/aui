@@ -1,20 +1,20 @@
 import * as React from 'react';
+import {useEffect, useState} from 'react';
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
 import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
-import ListItem from '@mui/material/ListItem';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
-import MailIcon from '@mui/icons-material/Mail';
-import {AppBar, IconButton, List, Toolbar, Typography} from "@mui/material";
-import MenuIcon from '@mui/icons-material/Menu';
+import {AppBar, TextField, Toolbar, Typography} from "@mui/material";
 import AuiList from "./AuiList";
-import {AccountCircle, FormatListNumbered, Info, ListAlt, Settings, Warning} from "@mui/icons-material";
+import Spacing from "./Spacing";
+import firebase from "firebase/compat";
 
 
-export default function TemporaryDrawer() {
+export default function App() {
+    const [rows, setRows] = useState([])
+    const [taskName, setTaskName] = useState('')
+    const [dateToDo, setDateToDo] = useState('')
+    const [extraInfo, setExtraInfo] = useState('')
+    const [loading, setLoading] = useState(true)
     const [state, setState] = React.useState({
         top: false,
         left: false,
@@ -30,59 +30,93 @@ export default function TemporaryDrawer() {
         setState({...state, [anchor]: open});
     };
 
-    const list = (anchor) => (
+    const list = () => (
         <Box
-            sx={{width: anchor === 'top' || anchor === 'bottom' ? 'auto' : 250}}
+            sx={{width: 300}}
             role="presentation"
-            onClick={toggleDrawer(anchor, false)}
-            onKeyDown={toggleDrawer(anchor, false)}
         >
-            <List>
-                {['List', '*not implemented yet*', '*not implemented yet*', '*not implemented yet*'].map((text, index) => (
-                    <ListItem button key={text}>
-                        <ListItemIcon>
-                            {index === 0 ? <ListAlt/> : <Warning/>}
-                        </ListItemIcon>
-                        <ListItemText primary={text}/>
-                    </ListItem>
-                ))}
-            </List>
-            <Divider/>
-            <List>
-                {['About', 'Settings', 'Profile'].map((text, index) => (
-                    <ListItem button key={text}>
-                        <ListItemIcon>
-                            {index === 2 ? <AccountCircle/> : index === 1 ? <Settings/> : <Info/>}
-                        </ListItemIcon>
-                        <ListItemText primary={text}/>
-                    </ListItem>
-                ))}
-            </List>
+            <Spacing/> <TextField sx={{ml: 5, mr: 5}} id="outlined-basic" label="Task Name" variant="outlined"
+                                  value={taskName}
+                                  onChange={e => setTaskName(e.target.value)}/>
+            <Spacing/> <TextField sx={{ml: 5, mr: 5}} id="outlined-basic" label="Extra Information" variant="outlined"
+                                  value={extraInfo}
+                                  onChange={e => setExtraInfo(e.target.value)}/>
+            <Spacing/> <TextField
+            sx={{ml: 5, mr: 5}}
+            label="Date To Do"
+            type="date"
+            value={dateToDo}
+            onChange={e => setDateToDo(e.target.value)}
+            InputLabelProps={{
+                shrink: true,
+            }}
+        />
+            <Spacing/>
+            <Button sx={{ml: 2, mr: 4}} variant="contained"
+                    onClick={() => addRow(taskName, new Date().toLocaleDateString("uk-Uk"), new Date(dateToDo).toLocaleDateString("uk-UK"), extraInfo)}>Create</Button>
+            <Button sx={{mr: 2, ml: 4}} variant="contained"
+                    onClick={toggleDrawer('left', false)}>Cancel</Button>
         </Box>
     );
+
+    function addRow(name, dateAdded, dateToDo, extraInfo) {
+        setRows([...rows, {name, dateAdded, dateToDo, extraInfo}])
+    }
+
+    function storeEntry(user) {
+        if (user != null) {
+            firebase.database().ref('usernames/' + user + '/entries').set(rows);
+        }
+    }
+
+    function readEntrys(user) {
+        firebase.database().ref('usernames/' + user + '/entries').on('value', (snap) => {
+            if (snap.val()) {
+                setRows(snap.val())
+            }
+            setLoading(false)
+        })
+    }
+
+    useEffect(() => {
+        rows.splice(0, 1)
+
+        readEntrys("administrator")
+    }, [])
+
+    useEffect(() => {
+        console.log(rows)
+        if (!loading)
+            storeEntry("administrator")
+    }, [rows])
+
+    function removeAll(user) {
+        let newArray = []
+        setRows(newArray)
+
+        if (user != null) {
+            firebase.database().ref('usernames/' + user + '/entries').set(newArray);
+        }
+    }
 
     return (
         <div>
             <Box sx={{flexGrow: 1}}>
                 <AppBar position="static">
                     <Toolbar>
-                        <IconButton
-                            size="large"
-                            edge="start"
+                        <Button
                             color="inherit"
-                            aria-label="menu"
-                            sx={{mr: 2}}
+                            variant="outlined"
+                            sx={{mr: 100}}
                             onClick={toggleDrawer('left', true)}
-                        >
-                            <MenuIcon/>
-                        </IconButton>
-                        <Typography variant="h6" component="div" sx={{flexGrow: 1}}>
-                            List
+                        >Create</Button>
+                        <Typography variant="h4" component="div" sx={{flexGrow: 1}}>
+                            AUI
                         </Typography>
-                        <Button color="inherit">Login</Button>
+                        <Button sx={{color: "#FF0000"}}>A D M I N I S T R A T O R</Button>
                     </Toolbar>
                 </AppBar>
-                <AuiList/>
+                <AuiList rows={rows} loading={loading}/>
             </Box>
             <Drawer
                 anchor={'left'}
