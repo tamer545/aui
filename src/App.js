@@ -53,11 +53,18 @@ export default function App() {
         />
             <Spacing/>
             <Button sx={{ml: 2, mr: 4}} variant="contained"
-                    onClick={() => addRow(taskName, new Date().toLocaleDateString("uk-Uk"), new Date(dateToDo).toLocaleDateString("uk-UK"), extraInfo)}>Create</Button>
+                    onClick={() => onCreate(taskName, new Date().toLocaleDateString("uk-Uk"), new Date(dateToDo).toLocaleDateString("uk-UK"), extraInfo)}>Create</Button>
             <Button sx={{mr: 2, ml: 4}} variant="contained"
                     onClick={toggleDrawer('left', false)}>Cancel</Button>
         </Box>
     );
+
+    function onCreate(name, dateAdded, dateToDo, extraInfo){
+        toggleDrawer('left', false)
+        addRow(name, dateAdded, dateToDo, extraInfo)
+        setExtraInfo('')
+        setTaskName('')
+    }
 
     function addRow(name, dateAdded, dateToDo, extraInfo) {
         setRows([...rows, {name, dateAdded, dateToDo, extraInfo}])
