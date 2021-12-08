@@ -64,7 +64,7 @@ function AuiList(props) {
                             {props.loading ? (
                                 <LinearProgress/>) : (props?.rows?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, idx) => {
                                 return (
-                                    <TableRow sx={idx % 2 === 0 ? {backgroundColor: "gray"} : {}} hover role="checkbox"
+                                    <TableRow sx={idx % 2 === 0 ? {backgroundColor: "gray"} : {}} role="checkbox"
                                               tabIndex={-1}>
                                         {columns.map((column, index) => {
                                             const value = row[column.id];
