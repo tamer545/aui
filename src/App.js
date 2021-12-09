@@ -7,6 +7,7 @@ import {AppBar, TextField, Toolbar, Typography} from "@mui/material";
 import AuiList from "./AuiList";
 import Spacing from "./Spacing";
 import firebase from "firebase/compat";
+import {NavLink} from "react-router-dom";
 
 
 export default function App() {
@@ -14,7 +15,7 @@ export default function App() {
     const [taskName, setTaskName] = useState('')
     const [dateToDo, setDateToDo] = useState('')
     const [extraInfo, setExtraInfo] = useState('')
-    const [loading, setLoading] = useState(true)
+    const [loading, setLoading] = useState(false)
     const [state, setState] = React.useState({
         top: false,
         left: false,
@@ -60,7 +61,6 @@ export default function App() {
     );
 
     function onCreate(name, dateAdded, dateToDo, extraInfo){
-        toggleDrawer('left', false)
         addRow(name, dateAdded, dateToDo, extraInfo)
         setExtraInfo('')
         setTaskName('')
@@ -72,12 +72,12 @@ export default function App() {
 
     function storeEntry(user) {
         if (user != null) {
-            firebase.database().ref('usernames/' + user + '/entries').set(rows);
+            firebase.database().ref('tokens/' + user + '/entries').set(rows);
         }
     }
 
     function readEntrys(user) {
-        firebase.database().ref('usernames/' + user + '/entries').on('value', (snap) => {
+        firebase.database().ref('tokens/' + user + '/entries').on('value', (snap) => {
             if (snap.val()) {
                 setRows(snap.val())
             }
@@ -86,15 +86,12 @@ export default function App() {
     }
 
     useEffect(() => {
-        rows.splice(0, 1)
-
-        readEntrys("administrator")
+        readEntrys(localStorage.getItem('token'))
     }, [])
 
     useEffect(() => {
-        console.log(rows)
         if (!loading)
-            storeEntry("administrator")
+            storeEntry(localStorage.getItem('token'))
     }, [rows])
 
     function removeAll(user) {
@@ -102,7 +99,7 @@ export default function App() {
         setRows(newArray)
 
         if (user != null) {
-            firebase.database().ref('usernames/' + user + '/entries').set(newArray);
+            firebase.database().ref('tokens/' + user + '/entries').set(newArray);
         }
     }
 
@@ -120,7 +117,7 @@ export default function App() {
                         <Typography variant="h4" component="div" sx={{flexGrow: 1}}>
                             AUI
                         </Typography>
-                        <Button sx={{color: "#FF0000"}}>A D M I N I S T R A T O R</Button>
+                        <NavLink to="/login"><Button sx={{color: "#FF0000"}}>{localStorage.getItem('token')}</Button></NavLink>
                     </Toolbar>
                 </AppBar>
                 <AuiList rows={rows} loading={loading}/>

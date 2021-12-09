@@ -3,8 +3,9 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
 import firebase from "firebase/compat/app";
-import AuiList from "./AuiList";
+import {BrowserRouter} from 'react-router-dom';
 import App from "./App";
+import RouterComponent from "./RouterComponent";
 
 // Initialize Firebase
 const firebaseConfig = {
@@ -21,7 +22,7 @@ firebase.initializeApp(firebaseConfig);
 
 ReactDOM.render(
     <React.StrictMode>
-        <App/>
+            <RouterComponent/>
     </React.StrictMode>,
     document.getElementById('root')
 );
